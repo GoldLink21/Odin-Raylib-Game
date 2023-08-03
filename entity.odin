@@ -26,13 +26,13 @@ Entity :: struct {
     color : rl.Color,
 }
 
-E : Entity = {
+E := makeEntity(150,150,40,40,rl.RED) /*{
     {150,150},
     {40,40},
     {0,0},
     0,
     rl.RED
-}
+}*/
 
 E2 : Entity = {
     {250,250},
@@ -40,6 +40,16 @@ E2 : Entity = {
     {0,0},
     0,
     rl.PINK
+}
+
+makeEntity :: proc(x, y, width, height:f32, color:rl.Color) -> Entity {
+    return {
+        {x, y},
+        {width,height},
+        {0,0},
+        0,
+        color
+    }
 }
 
 // Rotates a point around an origin by an angle in degrees
@@ -85,13 +95,9 @@ getEntCorners :: proc(ent : ^Entity) -> [4]Vector2 {
     return rotateRect(ent.pos, ent.size, ent.offset, ent.angleD)
 }
 
-
-drawEntity :: proc(ent : ^Entity) {
+drawEntity :: proc(ent:^Entity) {
     using rl
-    // Draw what they should be
-
-    rl.DrawRectangleV(ent.pos - ent.size/2, ent.size, RAYWHITE)
-    // Attempt to draw the new shape after rotation
+    entityGetCenter(ent)
     pts := rotateRect(ent.pos, ent.size, ent.offset, ent.angleD)
     // Draw actual shape
     DrawTriangle(pts[2], pts[1], pts[0], ent.color)
@@ -102,6 +108,25 @@ drawEntity :: proc(ent : ^Entity) {
         rl.DrawLineEx(pts[i], pts[i+1], 2, rl.RAYWHITE)
     }
     rl.DrawLineEx(pts[0], pts[3], 2, rl.RAYWHITE)
+}
+
+
+drawEntityWithGuides :: proc(ent : ^Entity) {
+    using rl
+    // Draw what they should be
+
+    DrawRectangleV(ent.pos - ent.size/2, ent.size, RAYWHITE)
+    // Attempt to draw the new shape after rotation
+    pts := rotateRect(ent.pos, ent.size, ent.offset, ent.angleD)
+    // Draw actual shape
+    DrawTriangle(pts[2], pts[1], pts[0], ent.color)
+    DrawTriangle(pts[0], pts[3], pts[2], ent.color)
+
+    // Draw lines around actual location
+    for i in 0..<3 {
+        DrawLineEx(pts[i], pts[i+1], 2, rl.RAYWHITE)
+    }
+    DrawLineEx(pts[0], pts[3], 2, rl.RAYWHITE)
 
     // Draw offset point
     DrawCircleV(ent.pos + ent.offset, 4, PURPLE)
