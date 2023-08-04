@@ -17,7 +17,7 @@ main :: proc() {
     SetConfigFlags({.WINDOW_RESIZABLE})
     SetTargetFPS(60)
 
-    E.drawLayer = 2
+    player.drawLayer = 2
     E2.drawLayer = 1
 
     for !WindowShouldClose() {
@@ -27,7 +27,7 @@ main :: proc() {
     CloseWindow()
 }
 
-E := makeEntity(150,150,40,40,rl.RED, proc(this:^Entity){
+player := makeEntity(150,150,40,40,rl.RED, proc(this:^Entity){
     using rl
     speed : f32 = 5.0
     if IsKeyDown(.W) do this.pos.y -= speed
@@ -36,12 +36,18 @@ E := makeEntity(150,150,40,40,rl.RED, proc(this:^Entity){
     if IsKeyDown(.D) do this.pos.x += speed
     if IsKeyDown(.Q) do this.angleD -= speed
     if IsKeyDown(.E) do this.angleD += speed
-    if IsKeyDown(.F) do moveEntForward(this, speed)
+    if IsKeyDown(.F) do entMoveForward(this, speed)
     
     if IsKeyDown(.UP) do this.rotateOffset.y -= speed
     if IsKeyDown(.DOWN) do this.rotateOffset.y += speed
     if IsKeyDown(.LEFT) do this.rotateOffset.x -= speed
     if IsKeyDown(.RIGHT) do this.rotateOffset.x += speed
+
+    if IsKeyPressed(.SPACE) {
+        center := entGetCenter(this)
+        bullet := makeBullet(center.x, center.y, 10, 10, BLUE)
+        bullet.angleD = getAngleDBetween(center.x, center.y, f32(GetMouseX()), f32(GetMouseY()))
+    }
 })
 
 E2 := makeEntity(250,250,40,40,rl.PINK)
@@ -53,10 +59,10 @@ UpdateAll :: proc() {
     updateAllEntities()
 
     // Short term changes
-    if entitiyCollides(E, E2) {
-        E.color = GREEN
+    if entitiyCollides(player, E2) {
+        player.color = GREEN
     } else {
-        E.color = RED
+        player.color = RED
     }
 }
 

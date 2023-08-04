@@ -36,7 +36,7 @@ isProjectionHit :: proc(rect, onRect:^Entity) -> bool {
         halfRectSize := (idx == 0 ? onRect.size.x : onRect.size.y) / 2
         for corner in corners {
             projected := projectPointOnLine(corner, line)
-            CP := projected - entityGetCenter(onRect)
+            CP := projected - entGetCenter(onRect)
             sign := (CP.x * line.direction.x) + (CP.y * line.direction.y) > 0
             signedDistance := vectorMagnitude(CP) * (sign ? 1 : -1)
 
