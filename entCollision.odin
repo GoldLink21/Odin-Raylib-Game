@@ -57,7 +57,7 @@ isProjectionHit :: proc(rect, onRect:^Entity) -> bool {
 }
 @(private="file")
 getEntAxis :: proc(ent : ^Entity) -> [2]Line {
-    newCenter := rotatePoint(ent.pos, ent.offset + ent.pos, ent.angleD)
+    newCenter := rotatePoint(ent.pos, ent.rotateOffset + ent.pos, ent.angleD)
     return {
         {newCenter, rotatePoint({1, 0}, {0,0}, ent.angleD)},
         {newCenter, rotatePoint({0, 1}, {0,0}, ent.angleD)}

@@ -10,12 +10,11 @@ main :: proc() {
     // fmt.printf("Hello\n")
     using rl
     
-    
     screenWidth :: 800
     screenHeight :: 450
 
     InitWindow(screenWidth, screenHeight, "Testing")
-
+    SetConfigFlags({.WINDOW_RESIZABLE})
     SetTargetFPS(60)
 
     E.drawLayer = 2
@@ -27,6 +26,25 @@ main :: proc() {
     }
     CloseWindow()
 }
+
+E := makeEntity(150,150,40,40,rl.RED, proc(this:^Entity){
+    using rl
+    speed : f32 = 5.0
+    if IsKeyDown(.W) do this.pos.y -= speed
+    if IsKeyDown(.S) do this.pos.y += speed
+    if IsKeyDown(.A) do this.pos.x -= speed
+    if IsKeyDown(.D) do this.pos.x += speed
+    if IsKeyDown(.Q) do this.angleD -= speed
+    if IsKeyDown(.E) do this.angleD += speed
+    if IsKeyDown(.F) do moveEntForward(this, speed)
+    
+    if IsKeyDown(.UP) do this.rotateOffset.y -= speed
+    if IsKeyDown(.DOWN) do this.rotateOffset.y += speed
+    if IsKeyDown(.LEFT) do this.rotateOffset.x -= speed
+    if IsKeyDown(.RIGHT) do this.rotateOffset.x += speed
+})
+
+E2 := makeEntity(250,250,40,40,rl.PINK)
 
 UpdateAll :: proc() {
     using rl
