@@ -17,7 +17,6 @@ entGetCenter :: proc(ent : ^Entity) -> Vector2 {
     return rotatePoint(ent.pos, ent.rotateOffset + ent.pos, ent.angleD)
 }
 
-
 entMoveForward :: proc(ent:^Entity, speed:f32) {
     ent.pos = movePosAtAngle(ent.pos, ent.angleD, speed)
 }

@@ -11,6 +11,24 @@ Vector2 :: rl.Vector2
 Vector3 :: rl.Vector3
 Vector4 :: rl.Vector4
 
+EntityVariants :: union {
+    ^Entity, 
+    ^Gun, 
+    ^Bullet,
+}
+
+EntityDeltas :: struct {
+    x, y, w, h: f32,
+    angleD: f32
+}
+
+updateEntityDeltas :: proc(ent:^Entity) {
+    ent.pos += {ent.change.x, ent.change.y}
+    ent.size += {ent.change.w, ent.change.h}    
+    ent.angleD += ent.change.angleD
+}
+
+
 Line :: struct {
     origin, 
     direction: Vector2,
@@ -24,14 +42,18 @@ EntityDataValue :: union {
 
 Entity :: struct {
     // Center of rect
-    pos : Vector2,
+    using pos : Vector2,
     // Rect dimensions
     size : Vector2,
+    // General speed used for moving
+    speed : f32,
     // Offset from center for rotations
     rotateOffset : Vector2,
     // Angle to rotate for
     angleD : f32,
+    // The color of the entity
     color : rl.Color,
+    // Tells if the entity should be removed in the next game tick
     toRemove : bool,
     // The higher the value, the more it's above others
     drawLayer : i8,
@@ -40,29 +62,41 @@ Entity :: struct {
     drawProc : proc(this:^Entity),
     // The number of updates the entity has gone through
     ticks : u32,
+    // Holds general information that doesn't need to be always immediately accessible
     props : EntityProperties,
     // Stores any extra data for the entity
-    data : map[string]EntityDataValue
+    data : map[string]EntityDataValue,
+    // Entity to follow on movement
+    parent : ^Entity,
+    // offset from the parent, .x is forward, .y is sideways
+    parentOffset : Vector2,
+    // Update when needing more entity types
+    variant : EntityVariants,
+    // Values that change each tick
+    change : EntityDeltas,
 }
 
 EntityProperties :: struct {
     hidden : bool,
     // Skip updating the entity
     supressUpdate : bool,
+    // Updates angle to be the same as the parent every tick
+    matchParentAngle : bool,
 }
 
 
 
 makeEntityProps :: proc() -> EntityProperties {
     return {
-        false,
-        false,
+        hidden = false,
+        supressUpdate = false,
+        matchParentAngle = true,
     }
 }
 
 // Handles setting up all small things with generic entities
-makeEntity :: proc(x, y, width, height:f32, color:rl.Color, update:proc(^Entity)=nil, draw:proc(^Entity)=nil) -> ^Entity {
-    ent := new(Entity)
+makeEntity :: proc($T: typeid, x, y, width, height:f32, color:rl.Color, update:proc(^Entity)=nil, draw:proc(^Entity)=nil) -> ^T {
+    ent := new(T)
     ent.pos = {x, y}
     ent.size = {width, height}
     ent.rotateOffset = {0,0}
@@ -72,9 +106,15 @@ makeEntity :: proc(x, y, width, height:f32, color:rl.Color, update:proc(^Entity)
     ent.drawProc = draw
     ent.drawLayer = 0
 
+    ent.speed = 0
+
     ent.props = makeEntityProps()
 
     ent.data = make(map[string]EntityDataValue)
+
+    ent.parentOffset = {0,0}
+
+    ent.variant = ent
 
     append(&entities, ent)
 
@@ -141,17 +181,30 @@ updateAllEntities :: proc() {
         return e1.drawLayer < e2.drawLayer
     })
     for i := 0; i < len(entities); i += 1 {
-        if entities[i].toRemove {
+        ent := entities[i]
+        if ent.toRemove {
             // Removes any allocated data from an entity
-            cleanEntity(entities[i])
+            cleanEntity(ent)
             ordered_remove(&entities, i)
             i -= 1
         } else {
-            if entities[i].update != nil && !entities[i].props.supressUpdate do entities[i]->update()
+            if ent.parent != nil {
+                // Go to parent position
+                ent.pos = movePosAtAngle(movePosAtAngle(ent.parent.pos, ent.parent.angleD, ent.parentOffset.x), ent.parent.angleD + 90, ent.parentOffset.y)
+                // Spin around same as parent
+                ent.rotateOffset = ent.parent.rotateOffset
+                // Face the way of the parent
+                if ent.props.matchParentAngle do ent.angleD = ent.parent.angleD
+            }
+            // Use update function if its there
+            if ent.update != nil && !ent.props.supressUpdate do ent->update()
+            // Change entity by set values
+            updateEntityDeltas(ent)
             entities[i].ticks += 1
         }
     }
 }
+
 
 // Takes a line and converts to a raylib Ray and draws it
 drawLine :: proc(line : Line, color: rl.Color) {

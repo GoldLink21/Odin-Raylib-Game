@@ -18,7 +18,11 @@ main :: proc() {
     SetTargetFPS(60)
 
     player.drawLayer = 2
+    player.speed = 5
     E2.drawLayer = 1
+    playerGun.parent = player
+    playerGun.parentOffset = {25, 5}
+    playerGun.drawLayer = 3
 
     for !WindowShouldClose() {
         UpdateAll()
@@ -27,61 +31,38 @@ main :: proc() {
     CloseWindow()
 }
 
-player := makeEntity(150,150,40,40,rl.RED, proc(this:^Entity){
+player := makeEntity(Entity, 150,150,40,40,rl.RED, proc(this:^Entity){
     using rl
-    speed : f32 = 5.0
-    if IsKeyDown(.W) do this.pos.y -= speed
-    if IsKeyDown(.S) do this.pos.y += speed
-    if IsKeyDown(.A) do this.pos.x -= speed
-    if IsKeyDown(.D) do this.pos.x += speed
-    if IsKeyDown(.Q) do this.angleD -= speed
-    if IsKeyDown(.E) do this.angleD += speed
-    if IsKeyDown(.F) do entMoveForward(this, speed)
+    if IsKeyDown(.W) do this.pos.y -= this.speed
+    if IsKeyDown(.S) do this.pos.y += this.speed
+    if IsKeyDown(.A) do this.pos.x -= this.speed
+    if IsKeyDown(.D) do this.pos.x += this.speed
+    if IsKeyDown(.Q) do this.angleD -= this.speed
+    if IsKeyDown(.E) do this.angleD += this.speed
+    if IsKeyDown(.F) do entMoveForward(this, this.speed)
     
-    if IsKeyDown(.UP) do this.rotateOffset.y -= speed
-    if IsKeyDown(.DOWN) do this.rotateOffset.y += speed
-    if IsKeyDown(.LEFT) do this.rotateOffset.x -= speed
-    if IsKeyDown(.RIGHT) do this.rotateOffset.x += speed
+    if IsKeyDown(.UP) do this.rotateOffset.y -= this.speed
+    if IsKeyDown(.DOWN) do this.rotateOffset.y += this.speed
+    if IsKeyDown(.LEFT) do this.rotateOffset.x -= this.speed
+    if IsKeyDown(.RIGHT) do this.rotateOffset.x += this.speed
 
-    if IsKeyPressed(.SPACE) {
-        center := entGetCenter(this)
-        bullet := makeBullet(center.x, center.y, 10, 10, BLUE)
-        bullet.angleD = getAngleDBetween(center.x, center.y, f32(GetMouseX()), f32(GetMouseY()))
-    }
+    // Point to mouse
+    center := entGetCenter(this)
+    this.angleD = getAngleDBetween(center.x, center.y, f32(GetMouseX()), f32(GetMouseY()))
 })
 
-E2 := makeEntity(250,250,40,40,rl.PINK)
+playerGun := makeGun(player, GunTypeAuto{10, 0}, 30,5, rl.GOLD, proc(this:^Gun) -> ^Entity{
+    bullet := makeBullet(this, 5,5,rl.RED)
+    return bullet
+})
+
+E2 := makeEntity(Entity, 250,250,40,40,rl.PINK)
 
 UpdateAll :: proc() {
-    using rl
-    updateControls()
-
     updateAllEntities()
-
     // Short term changes
-    if entitiyCollides(player, E2) {
-        player.color = GREEN
-    } else {
-        player.color = RED
-    }
-}
-
-updateControls :: proc() {
-    using rl
-    // speed : f32 = 5.0
-    // if IsKeyDown(.W) do E.pos.y -= speed
-    // if IsKeyDown(.S) do E.pos.y += speed
-    // if IsKeyDown(.A) do E.pos.x -= speed
-    // if IsKeyDown(.D) do E.pos.x += speed
-    // if IsKeyDown(.Q) do E.angleD -= speed
-    // if IsKeyDown(.E) do E.angleD += speed
     
-    // if IsKeyDown(.UP) do E.offset.y -= speed
-    // if IsKeyDown(.DOWN) do E.offset.y += speed
-    // if IsKeyDown(.LEFT) do E.offset.x -= speed
-    // if IsKeyDown(.RIGHT) do E.offset.x += speed
 }
-
 
 
 DrawAll :: proc() {

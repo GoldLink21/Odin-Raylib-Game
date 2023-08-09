@@ -47,6 +47,12 @@ rotateRect :: proc(pos, size, rotateOffset: Vector2, angleD : f32) -> [4]Vector2
     }
 }
 
-getAngleDBetween :: proc(x1, y1, x2, y2:f32) -> f32 {
+getAngleDBetweenXY :: proc(x1, y1, x2, y2:f32) -> f32 {
     return math.to_degrees(math.atan2(y2 - y1, x2 - x1)) 
 }
+
+getAngleDBetweenV :: proc(p1, p2: Vector2) -> f32 {
+    return getAngleDBetweenXY(p1.x, p1.y, p2.x, p2.y)
+}
+
+getAngleDBetween :: proc{getAngleDBetweenV, getAngleDBetweenXY}
