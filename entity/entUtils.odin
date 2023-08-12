@@ -1,10 +1,11 @@
-package main
+package entity
 
 import rl "vendor:raylib"
+import "../util"
 
 // Gets entity corner positions
 getEntCorners :: proc(ent : ^Entity) -> [4]Vector2 {
-    return rotateRect(ent.pos, ent.size, ent.rotateOffset, ent.angleD)
+    return util.rotateRect(ent.pos, ent.size, ent.rotateOffset, ent.angleD)
 }
 
 // Used as drawProc
@@ -14,9 +15,9 @@ entDrawAsOval :: proc(this : ^Entity) {
 
 // Gets an entities center point after rotation
 entGetCenter :: proc(ent : ^Entity) -> Vector2 {
-    return rotatePoint(ent.pos, ent.rotateOffset + ent.pos, ent.angleD)
+    return util.rotatePoint(ent.pos, ent.rotateOffset + ent.pos, ent.angleD)
 }
 
 entMoveForward :: proc(ent:^Entity, speed:f32) {
-    ent.pos = movePosAtAngle(ent.pos, ent.angleD, speed)
+    ent.pos = util.movePosAtAngle(ent.pos, ent.angleD, speed)
 }

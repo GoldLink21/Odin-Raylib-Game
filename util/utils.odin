@@ -1,6 +1,14 @@
-package main
+package util
 
 import "core:math"
+import rl "vendor:raylib"
+
+Vector2 :: rl.Vector2
+
+Line :: struct {
+    origin, 
+    direction: Vector2,
+}
 
 // Rotates a point around an origin by an angle in degrees
 rotatePoint :: proc(p:Vector2, origin:Vector2, angleD:f32) -> Vector2 {
@@ -56,3 +64,9 @@ getAngleDBetweenV :: proc(p1, p2: Vector2) -> f32 {
 }
 
 getAngleDBetween :: proc{getAngleDBetweenV, getAngleDBetweenXY}
+
+// Takes a line and converts to a raylib Ray and draws it
+drawLine :: proc(line : Line, color: rl.Color) {
+    ray : rl.Ray = {{line.origin.x, line.origin.y, 0}, {line.direction.x, line.direction.y, 0}}
+    rl.DrawRay(ray, color)
+}

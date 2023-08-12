@@ -1,9 +1,11 @@
-package main
+package entity
 
 import "core:fmt"
 import "core:math/rand"
 import pm "vendor:portmidi"
 import rl "vendor:raylib"
+
+import "../util"
 
 Bullet :: struct {
     using entity:Entity,
@@ -32,7 +34,7 @@ bulletUpdate :: proc(this:^Entity) {
         this.toRemove = true
         return
     }
-    this.pos = movePosAtAngle(this.pos, bullet.fireAngleD, this.speed)
+    this.pos = util.movePosAtAngle(this.pos, bullet.fireAngleD, this.speed)
     // entMoveForward(this, this.speed)
 }
 

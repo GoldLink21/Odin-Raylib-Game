@@ -1,4 +1,4 @@
-package main
+package entity
 
 import "core:math"
 import "core:fmt"
@@ -7,9 +7,8 @@ import "core:sort"
 import "core:slice"
 import rl "vendor:raylib"
 
-Vector2 :: rl.Vector2
-Vector3 :: rl.Vector3
-Vector4 :: rl.Vector4
+import "../util"
+
 
 EntityVariants :: union {
     ^Entity, 
@@ -28,14 +27,9 @@ updateEntityDeltas :: proc(ent:^Entity) {
     ent.angleD += ent.change.angleD
 }
 
-
-Line :: struct {
-    origin, 
-    direction: Vector2,
-}
-
 entities : [dynamic]^Entity
 
+// Data stored within the entity data hash table
 EntityDataValue :: union {
     string, f32
 }
@@ -137,7 +131,7 @@ drawEntity :: proc(ent:^Entity) {
         ent->drawProc()
         ent.pos = oldPos
     } else {
-        pts := rotateRect(ent.pos, ent.size, ent.rotateOffset, ent.angleD)
+        pts := util.rotateRect(ent.pos, ent.size, ent.rotateOffset, ent.angleD)
         // Draw actual shape
         DrawTriangle(pts[2], pts[1], pts[0], ent.color)
         DrawTriangle(pts[0], pts[3], pts[2], ent.color)
@@ -157,7 +151,7 @@ drawEntityWithGuides :: proc(ent : ^Entity) {
 
     DrawRectangleV(ent.pos - ent.size/2, ent.size, RAYWHITE)
     // Attempt to draw the new shape after rotation
-    pts := rotateRect(ent.pos, ent.size, ent.rotateOffset, ent.angleD)
+    pts := util.rotateRect(ent.pos, ent.size, ent.rotateOffset, ent.angleD)
     // Draw actual shape
     DrawTriangle(pts[2], pts[1], pts[0], ent.color)
     DrawTriangle(pts[0], pts[3], pts[2], ent.color)
@@ -190,7 +184,7 @@ updateAllEntities :: proc() {
         } else {
             if ent.parent != nil {
                 // Go to parent position
-                ent.pos = movePosAtAngle(movePosAtAngle(ent.parent.pos, ent.parent.angleD, ent.parentOffset.x), ent.parent.angleD + 90, ent.parentOffset.y)
+                ent.pos = util.movePosAtAngle(util.movePosAtAngle(ent.parent.pos, ent.parent.angleD, ent.parentOffset.x), ent.parent.angleD + 90, ent.parentOffset.y)
                 // Spin around same as parent
                 ent.rotateOffset = ent.parent.rotateOffset
                 // Face the way of the parent
@@ -203,11 +197,4 @@ updateAllEntities :: proc() {
             entities[i].ticks += 1
         }
     }
-}
-
-
-// Takes a line and converts to a raylib Ray and draws it
-drawLine :: proc(line : Line, color: rl.Color) {
-    ray : rl.Ray = {{line.origin.x, line.origin.y, 0}, {line.direction.x, line.direction.y, 0}}
-    rl.DrawRay(ray, color)
 }

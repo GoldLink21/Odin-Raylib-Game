@@ -1,6 +1,11 @@
-package main
+package entity
 
 import "core:math"
+import rl "vendor:raylib"
+
+import "../util"
+
+Vector2 :: rl.Vector2
 
 /*
  Most of this is adapted from
@@ -55,17 +60,18 @@ isProjectionHit :: proc(rect, onRect:^Entity) -> bool {
     }
     return true
 }
+
 @(private="file")
-getEntAxis :: proc(ent : ^Entity) -> [2]Line {
-    newCenter := rotatePoint(ent.pos, ent.rotateOffset + ent.pos, ent.angleD)
+getEntAxis :: proc(ent : ^Entity) -> [2]util.Line {
+    newCenter := util.rotatePoint(ent.pos, ent.rotateOffset + ent.pos, ent.angleD)
     return {
-        {newCenter, rotatePoint({1, 0}, {0,0}, ent.angleD)},
-        {newCenter, rotatePoint({0, 1}, {0,0}, ent.angleD)}
+        {newCenter, util.rotatePoint({1, 0}, {0,0}, ent.angleD)},
+        {newCenter, util.rotatePoint({0, 1}, {0,0}, ent.angleD)}
     }
 }
 
 @(private="file")
-projectPointOnLine :: proc(point:Vector2, line:Line) -> Vector2 {
+projectPointOnLine :: proc(point:Vector2, line:util.Line) -> Vector2 {
     dotVal := line.direction.x * (point.x - line.origin.x) + line.direction.y * (point.y - line.origin.y)
     return {
         line.origin.x + line.direction.x * dotVal,
